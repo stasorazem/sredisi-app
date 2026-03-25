@@ -338,15 +338,17 @@ def get_salons(city=None, category=None, search=None):
     if city and city != "Vsa mesta":
         query += " AND city = ?"
         params.append(city)
+
     if category and category != "Vse kategorije":
         query += " AND category = ?"
         params.append(category)
-    if search:
+
+    if search and search.strip():
         query += " AND (name LIKE ? OR description LIKE ? OR address LIKE ?)"
-        like = f"%{search}%"
+        like = f"%{search.strip()}%"
         params.extend([like, like, like])
 
-    query += " ORDER BY rating DESC, name ASC"
+    query += " ORDER BY city ASC, rating DESC, name ASC"
     return fetch_all(query, tuple(params))
 
 
