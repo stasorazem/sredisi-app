@@ -680,14 +680,18 @@ def partner_dashboard():
 
 def setup_page():
     st.set_page_config(page_title="UrediMe", page_icon="✨", layout="wide")
-    st.markdown(
-        """
-        <style>
-            .stApp {max-width: 1400px; margin: 0 auto;}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+st.markdown(
+    """
+    <style>
+        .stApp {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #fff8fb 0%, #ffffff 50%);
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 def main():
