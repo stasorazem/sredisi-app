@@ -1,6 +1,5 @@
 import sqlite3
 from datetime import datetime, date, timedelta
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -182,9 +181,27 @@ def seed_data(conn):
     )
 
     reviews = [
-        (salon_map["Studio Lepota Koper"], "Petra", 5, "Zelo prijazni in točni.", datetime.now().isoformat()),
-        (salon_map["Morski SPA Izola"], "Matej", 4, "Odlična masaža in lep ambient.", datetime.now().isoformat()),
-        (salon_map["Ljubljana Glow Bar"], "Nika", 5, "Top nohti, zelo priporočam.", datetime.now().isoformat()),
+        (
+            salon_map["Studio Lepota Koper"],
+            "Petra",
+            5,
+            "Zelo prijazni in točni.",
+            datetime.now().isoformat(),
+        ),
+        (
+            salon_map["Morski SPA Izola"],
+            "Matej",
+            4,
+            "Odlična masaža in lep ambient.",
+            datetime.now().isoformat(),
+        ),
+        (
+            salon_map["Ljubljana Glow Bar"],
+            "Nika",
+            5,
+            "Top nohti, zelo priporočam.",
+            datetime.now().isoformat(),
+        ),
     ]
     cur.executemany(
         """
@@ -203,7 +220,7 @@ def fetch_all(query, params=()):
     cur.execute(query, params)
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return [dict(r) for r in rows]
 
 
 def execute(query, params=()):
@@ -246,7 +263,8 @@ def get_employees(salon_id):
 
 def get_services(salon_id):
     return fetch_all(
-        "SELECT * FROM services WHERE salon_id = ? ORDER BY category, name ASC", (salon_id,)
+        "SELECT * FROM services WHERE salon_id = ? ORDER BY category, name ASC",
+        (salon_id,),
     )
 
 
@@ -260,8 +278,13 @@ def get_available_times(employee_id, booking_date, service_duration=60):
     start_hour = 8
     end_hour = 19
     slots = []
-    current = datetime.combine(booking_date, datetime.min.time()).replace(hour=start_hour, minute=0)
-    end_dt = datetime.combine(booking_date, datetime.min.time()).replace(hour=end_hour, minute=0)
+
+    current = datetime.combine(booking_date, datetime.min.time()).replace(
+        hour=start_hour, minute=0
+    )
+    end_dt = datetime.combine(booking_date, datetime.min.time()).replace(
+        hour=end_hour, minute=0
+    )
 
     existing = fetch_all(
         """
@@ -285,7 +308,10 @@ def get_available_times(employee_id, booking_date, service_duration=60):
 
     while current + timedelta(minutes=service_duration) <= end_dt:
         proposed_end = current + timedelta(minutes=service_duration)
-        conflict = any(current < occ_end and proposed_end > occ_start for occ_start, occ_end in occupied)
+        conflict = any(
+            current < occ_end and proposed_end > occ_start
+            for occ_start, occ_end in occupied
+        )
         if not conflict:
             slots.append(current.strftime("%H:%M"))
         current += timedelta(minutes=30)
@@ -293,7 +319,16 @@ def get_available_times(employee_id, booking_date, service_duration=60):
     return slots
 
 
-def create_booking(salon_id, employee_id, service_id, customer_name, customer_phone, customer_email, booking_date, booking_time):
+def create_booking(
+    salon_id,
+    employee_id,
+    service_id,
+    customer_name,
+    customer_phone,
+    customer_email,
+    booking_date,
+    booking_time,
+):
     return execute(
         """
         INSERT INTO bookings (
@@ -317,7 +352,9 @@ def create_booking(salon_id, employee_id, service_id, customer_name, customer_ph
 
 
 def update_salon_rating(salon_id):
-    rows = fetch_all("SELECT AVG(stars) AS avg_stars FROM reviews WHERE salon_id = ?", (salon_id,))
+    rows = fetch_all(
+        "SELECT AVG(stars) AS avg_stars FROM reviews WHERE salon_id = ?", (salon_id,)
+    )
     avg = rows[0]["avg_stars"] if rows and rows[0]["avg_stars"] is not None else 0
     execute("UPDATE salons SET rating = ? WHERE id = ?", (round(avg, 1), salon_id))
 
@@ -360,23 +397,30 @@ def salon_card(salon):
     with st.container(border=True):
         col1, col2 = st.columns([1.2, 2])
         with col1:
-            if salon["image_url"]:
+            if salon.get("image_url"):
                 st.image(salon["image_url"], use_container_width=True)
         with col2:
             st.subheader(salon["name"])
             st.write(f"**Mesto:** {salon['city']}")
             st.write(f"**Kategorija:** {salon['category']}")
             st.write(f"**Ocena:** ⭐ {salon['rating']}")
-            st.write(f"**Naslov:** {salon['address']}")
-            st.write(salon["description"])
+            st.write(f"**Naslov:** {salon.get('address', '')}")
+            st.write(salon.get("description", ""))
 
 
 def main_page():
-    st.title("Sredi.si 🇸🇮")
-    st.caption("Slovenska MVP verzija za iskanje in rezervacijo terminov v salonih lepote, SPA centrih in wellness studiih.")
+    st.title("UrediMe 🇸🇮")
+    st.caption(
+        "Slovenska MVP verzija za iskanje in rezervacijo terminov v salonih lepote, SPA centrih in wellness studiih."
+    )
 
-    cities = ["Vsa mesta"] + [r["city"] for r in fetch_all("SELECT DISTINCT city FROM salons ORDER BY city")]
-    categories = ["Vse kategorije"] + [r["category"] for r in fetch_all("SELECT DISTINCT category FROM salons ORDER BY category")]
+    cities = ["Vsa mesta"] + [
+        r["city"] for r in fetch_all("SELECT DISTINCT city FROM salons ORDER BY city")
+    ]
+    categories = ["Vse kategorije"] + [
+        r["category"]
+        for r in fetch_all("SELECT DISTINCT category FROM salons ORDER BY category")
+    ]
 
     col1, col2, col3 = st.columns([1, 1, 2])
     with col1:
@@ -392,7 +436,13 @@ def main_page():
         st.warning("Ni zadetkov za izbrane filtre.")
         return
 
-    selected = st.selectbox("Izberi salon", salons, format_func=lambda x: f"{x['name']} ({x['city']}) ⭐ {x['rating']}")
+    salon_labels = [
+        f"{s['name']} ({s['city']}) ⭐ {s['rating']}"
+        for s in salons
+    ]
+    selected_label = st.selectbox("Izberi salon", salon_labels)
+    selected = salons[salon_labels.index(selected_label)]
+
     salon_card(selected)
 
     tab1, tab2, tab3 = st.tabs(["Rezervacija", "Storitve in zaposleni", "Ocene"])
@@ -405,24 +455,41 @@ def main_page():
         if not employees or not services:
             st.info("Ta salon še nima dodanih zaposlenih ali storitev.")
         else:
+            employee_labels = [f"{e['name']} — {e['role']}" for e in employees]
+            service_labels = [
+                f"{s['name']} ({s['duration_min']} min / {s['price_eur']:.2f} €)"
+                for s in services
+            ]
+
             col1, col2 = st.columns(2)
             with col1:
-                chosen_employee = st.selectbox(
+                chosen_employee_label = st.selectbox(
                     "Izberi zaposlenega",
-                    employees,
-                    format_func=lambda x: f"{x['name']} — {x['role']}"
+                    employee_labels,
                 )
             with col2:
-                chosen_service = st.selectbox(
+                chosen_service_label = st.selectbox(
                     "Izberi storitev",
-                    services,
-                    format_func=lambda x: f"{x['name']} ({x['duration_min']} min / {x['price_eur']:.2f} €)"
+                    service_labels,
                 )
+
+            chosen_employee = employees[employee_labels.index(chosen_employee_label)]
+            chosen_service = services[service_labels.index(chosen_service_label)]
 
             min_date = date.today()
             max_date = date.today() + timedelta(days=30)
-            chosen_date = st.date_input("Datum", min_value=min_date, max_value=max_date, value=min_date)
-            available_times = get_available_times(chosen_employee["id"], chosen_date, chosen_service["duration_min"])
+            chosen_date = st.date_input(
+                "Datum",
+                min_value=min_date,
+                max_value=max_date,
+                value=min_date,
+            )
+
+            available_times = get_available_times(
+                chosen_employee["id"],
+                chosen_date,
+                chosen_service["duration_min"],
+            )
 
             if available_times:
                 chosen_time = st.selectbox("Prosti termini", available_times)
@@ -450,7 +517,10 @@ def main_page():
                         chosen_time,
                     )
                     st.success(f"Rezervacija uspešno ustvarjena. ID rezervacije: #{booking_id}")
-                    st.info(f"{selected['name']} • {chosen_service['name']} • {chosen_date.strftime('%d.%m.%Y')} ob {chosen_time}")
+                    st.info(
+                        f"{selected['name']} • {chosen_service['name']} • "
+                        f"{chosen_date.strftime('%d.%m.%Y')} ob {chosen_time}"
+                    )
 
     with tab2:
         st.markdown("### Ponudba salona")
@@ -459,38 +529,41 @@ def main_page():
 
         if services:
             st.markdown("#### Storitve")
-            df_services = pd.DataFrame([
-                {
-                    "Storitev": s["name"],
-                    "Kategorija": s["category"],
-                    "Trajanje (min)": s["duration_min"],
-                    "Cena (€)": s["price_eur"],
-                }
-                for s in services
-            ])
+            df_services = pd.DataFrame(
+                [
+                    {
+                        "Storitev": s["name"],
+                        "Kategorija": s["category"],
+                        "Trajanje (min)": s["duration_min"],
+                        "Cena (€)": s["price_eur"],
+                    }
+                    for s in services
+                ]
+            )
             st.dataframe(df_services, use_container_width=True, hide_index=True)
 
         if employees:
             st.markdown("#### Zaposleni")
-            df_employees = pd.DataFrame([
-                {"Ime": e["name"], "Vloga": e["role"]}
-                for e in employees
-            ])
+            df_employees = pd.DataFrame(
+                [{"Ime": e["name"], "Vloga": e["role"]} for e in employees]
+            )
             st.dataframe(df_employees, use_container_width=True, hide_index=True)
 
     with tab3:
         st.markdown("### Ocene uporabnikov")
         reviews = get_reviews(selected["id"])
+
         for rev in reviews:
             with st.container(border=True):
                 st.write(f"**{rev['customer_name']}** — {'⭐' * rev['stars']}")
-                if rev["comment"]:
+                if rev.get("comment"):
                     st.write(rev["comment"])
 
         st.markdown("#### Dodaj oceno")
         review_name = st.text_input("Tvoje ime")
         stars = st.slider("Ocena", min_value=1, max_value=5, value=5)
         comment = st.text_area("Komentar")
+
         if st.button("Objavi oceno"):
             if review_name.strip():
                 add_review(selected["id"], review_name.strip(), stars, comment.strip())
@@ -502,21 +575,27 @@ def main_page():
 
 def partner_dashboard():
     st.title("Partner nadzorna plošča")
-    st.caption("Osnovni del za salone: pregled rezervacij, dodajanje terminov, zaposlenih in storitev.")
+    st.caption(
+        "Osnovni del za salone: pregled rezervacij, dodajanje terminov, zaposlenih in storitev."
+    )
 
     salons = fetch_all("SELECT * FROM salons ORDER BY name")
     if not salons:
         st.info("Ni vnešenih salonov.")
         return
 
-    selected_salon = st.selectbox("Izberi salon", salons, format_func=lambda x: x["name"])
+    salon_labels = [s["name"] for s in salons]
+    selected_label = st.selectbox("Izberi salon", salon_labels)
+    selected_salon = salons[salon_labels.index(selected_label)]
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Rezervacije", "Dodaj storitev", "Dodaj zaposlenega", "Dodaj salon"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Rezervacije", "Dodaj storitev", "Dodaj zaposlenega", "Dodaj salon"]
+    )
 
     with tab1:
         rows = get_dashboard_bookings(selected_salon["id"])
         if rows:
-            df = pd.DataFrame([dict(r) for r in rows])
+            df = pd.DataFrame(rows)
             st.dataframe(df, use_container_width=True, hide_index=True)
         else:
             st.info("Za ta salon še ni rezervacij.")
@@ -525,16 +604,30 @@ def partner_dashboard():
         with st.form("service_form"):
             s_name = st.text_input("Naziv storitve")
             s_cat = st.text_input("Kategorija")
-            s_dur = st.number_input("Trajanje (min)", min_value=15, max_value=300, value=60, step=15)
-            s_price = st.number_input("Cena (€)", min_value=1.0, max_value=1000.0, value=30.0, step=1.0)
+            s_dur = st.number_input(
+                "Trajanje (min)", min_value=15, max_value=300, value=60, step=15
+            )
+            s_price = st.number_input(
+                "Cena (€)", min_value=1.0, max_value=1000.0, value=30.0, step=1.0
+            )
             submitted = st.form_submit_button("Dodaj storitev")
             if submitted:
                 if s_name.strip():
                     execute(
-                        "INSERT INTO services (salon_id, name, duration_min, price_eur, category) VALUES (?, ?, ?, ?, ?)",
-                        (selected_salon["id"], s_name.strip(), int(s_dur), float(s_price), s_cat.strip()),
+                        """
+                        INSERT INTO services (salon_id, name, duration_min, price_eur, category)
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
+                        (
+                            selected_salon["id"],
+                            s_name.strip(),
+                            int(s_dur),
+                            float(s_price),
+                            s_cat.strip(),
+                        ),
                     )
                     st.success("Storitev dodana.")
+                    st.rerun()
                 else:
                     st.warning("Naziv storitve je obvezen.")
 
@@ -550,6 +643,7 @@ def partner_dashboard():
                         (selected_salon["id"], e_name.strip(), e_role.strip()),
                     )
                     st.success("Zaposleni dodan.")
+                    st.rerun()
                 else:
                     st.warning("Ime in vloga sta obvezna.")
 
@@ -569,15 +663,23 @@ def partner_dashboard():
                         INSERT INTO salons (name, city, category, address, description, rating, image_url)
                         VALUES (?, ?, ?, ?, ?, 0, ?)
                         """,
-                        (name.strip(), city.strip(), category.strip(), address.strip(), description.strip(), image_url.strip()),
+                        (
+                            name.strip(),
+                            city.strip(),
+                            category.strip(),
+                            address.strip(),
+                            description.strip(),
+                            image_url.strip(),
+                        ),
                     )
                     st.success("Salon dodan.")
+                    st.rerun()
                 else:
                     st.warning("Naziv, mesto in kategorija so obvezni.")
 
 
 def setup_page():
-    st.set_page_config(page_title="Sredi.si", page_icon="💇", layout="wide")
+    st.set_page_config(page_title="UrediMe", page_icon="💇", layout="wide")
     st.markdown(
         """
         <style>
