@@ -679,7 +679,7 @@ def partner_dashboard():
 
 
 def setup_page():
-    st.set_page_config(page_title="UrediMe", page_icon="💇", layout="wide")
+    st.set_page_config(page_title="UrediMe", page_icon="✨", layout="wide")
     st.markdown(
         """
         <style>
