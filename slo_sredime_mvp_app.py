@@ -148,115 +148,65 @@ def init_db():
 def seed_data(conn):
     cur = conn.cursor()
 
-    salons = [
-        (
-            "Studio Lepota Koper",
-            "Koper",
-            "Frizerski in kozmetični salon",
-            "Pristaniška 12, Koper",
-            "Top frizerske in kozmetične storitve.",
-            4.8,
-            "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f",
-        ),
-        (
-            "Morski SPA Izola",
-            "Izola",
-            "SPA in masaže",
-            "Veliki trg 4, Izola",
-            "Sprostitveni wellness tretmaji.",
-            4.6,
-            "https://images.unsplash.com/photo-1515377905703-c4788e51af15",
-        ),
-        (
-            "Portorož Beauty Center",
-            "Portorož",
-            "Wellness & SPA",
-            "Obala 33, Portorož",
-            "Luksuzni SPA tretmaji ob morju.",
-            4.9,
-            "https://images.unsplash.com/photo-1500840216050-6ffa99d75160",
-        ),
-        (
-            "Ljubljana Glow Bar",
-            "Ljubljana",
-            "Nail & beauty",
-            "Trubarjeva 22, Ljubljana",
-            "Moderen beauty salon.",
-            4.9,
-            "https://images.unsplash.com/photo-1604654894610-df63bc536371",
-        ),
-        (
-            "Frizerski Studio Šiška",
-            "Ljubljana",
-            "Frizerstvo",
-            "Celovška 88, Ljubljana",
-            "Hitra in kvalitetna frizura.",
-            4.5,
-            "https://images.unsplash.com/photo-1560066984-138dadb4c035",
-        ),
-        (
-            "Maribor Style Studio",
-            "Maribor",
-            "Frizerstvo",
-            "Glavni trg 5, Maribor",
-            "Trend frizure in barvanje.",
-            4.7,
-            "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e",
-        ),
-        (
-            "Celje Beauty Point",
-            "Celje",
-            "Kozmetika",
-            "Center 12, Celje",
-            "Nega obraza in telesa.",
-            4.6,
-            "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-        ),
-        (
-            "Kranj Hair Lounge",
-            "Kranj",
-            "Frizerstvo",
-            "Prešernova 10, Kranj",
-            "Premium hair styling.",
-            4.8,
-            "https://images.unsplash.com/photo-1524504388940-b1c1722653e1",
-        ),
-        (
-            "Novo mesto Wellness",
-            "Novo mesto",
-            "SPA",
-            "Glavni trg 2, Novo mesto",
-            "Sprostitveni programi.",
-            4.5,
-            "https://images.unsplash.com/photo-1519823551278-64ac92734fb1",
-        ),
-    ]
+salons = [
+    ("Studio Lepota Koper", "Koper", "Frizerstvo", "Pristaniška 12, Koper", "Striženje, barvanje in nega las.", 4.8, "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f"),
+    ("Koper Beauty Room", "Koper", "Kozmetika", "Ferrarska 8, Koper", "Nega obraza, obrvi in trepalnice.", 4.7, "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f"),
 
-    cur.executemany(
-        """
-        INSERT INTO salons (name, city, category, address, description, rating, image_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        salons,
-    )
+    ("Morski SPA Izola", "Izola", "SPA", "Veliki trg 4, Izola", "Masaže in sprostitveni tretmaji.", 4.6, "https://images.unsplash.com/photo-1515377905703-c4788e51af15"),
+    ("Izola Nail Studio", "Izola", "Nail", "Cankarjev drevored 3, Izola", "Manikira in pedikira.", 4.5, "https://images.unsplash.com/photo-1604654894610-df63bc536371"),
 
-    cur.execute("SELECT id, name FROM salons")
-    salon_map = {row["name"]: row["id"] for row in cur.fetchall()}
+    ("Portorož Beauty Center", "Portorož", "SPA", "Obala 33, Portorož", "Wellness in premium SPA storitve.", 4.9, "https://images.unsplash.com/photo-1500840216050-6ffa99d75160"),
+    ("Portorož Hair Lounge", "Portorož", "Frizerstvo", "Obala 21, Portorož", "Moderne ženske in moške frizure.", 4.6, "https://images.unsplash.com/photo-1560066984-138dadb4c035"),
 
-    employees = [
-        (salon_map["Studio Lepota Koper"], "Nina", "Frizerka"),
-        (salon_map["Studio Lepota Koper"], "Sara", "Kozmetičarka"),
-        (salon_map["Morski SPA Izola"], "Marko", "Maser"),
-        (salon_map["Morski SPA Izola"], "Tina", "Wellness"),
-        (salon_map["Portorož Beauty Center"], "Eva", "SPA terapevtka"),
-        (salon_map["Ljubljana Glow Bar"], "Ana", "Nail artist"),
-        (salon_map["Ljubljana Glow Bar"], "Maja", "Beauty specialist"),
-        (salon_map["Frizerski Studio Šiška"], "Miha", "Frizer"),
-        (salon_map["Maribor Style Studio"], "Luka", "Frizer"),
-        (salon_map["Celje Beauty Point"], "Maja", "Kozmetičarka"),
-        (salon_map["Kranj Hair Lounge"], "Tanja", "Frizerka"),
-        (salon_map["Novo mesto Wellness"], "Petra", "Maserka"),
-    ]
+    ("Ljubljana Glow Bar", "Ljubljana", "Beauty", "Trubarjeva 22, Ljubljana", "Moderen beauty salon.", 4.9, "https://images.unsplash.com/photo-1604654894610-df63bc536371"),
+    ("Frizerski Studio Šiška", "Ljubljana", "Frizerstvo", "Celovška 88, Ljubljana", "Hitra in kvalitetna frizura.", 4.5, "https://images.unsplash.com/photo-1560066984-138dadb4c035"),
+    ("Ljubljana Zen SPA", "Ljubljana", "SPA", "Dunajska 55, Ljubljana", "Masaže, savna in wellness paketi.", 4.8, "https://images.unsplash.com/photo-1519823551278-64ac92734fb1"),
+
+    ("Maribor Style Studio", "Maribor", "Frizerstvo", "Glavni trg 5, Maribor", "Trend frizure in barvanje.", 4.7, "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e"),
+    ("Maribor Beauty Point", "Maribor", "Kozmetika", "Partizanska 14, Maribor", "Nega kože in makeup.", 4.6, "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f"),
+
+    ("Celje Beauty Point", "Celje", "Kozmetika", "Center 12, Celje", "Nega obraza in telesa.", 4.6, "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f"),
+    ("Celje Hair Studio", "Celje", "Frizerstvo", "Stanetova 7, Celje", "Barvanje, styling in striženje.", 4.5, "https://images.unsplash.com/photo-1524504388940-b1c1722653e1"),
+
+    ("Kranj Hair Lounge", "Kranj", "Frizerstvo", "Prešernova 10, Kranj", "Premium hair styling.", 4.8, "https://images.unsplash.com/photo-1524504388940-b1c1722653e1"),
+    ("Kranj Relax Center", "Kranj", "SPA", "Gregorčičeva 9, Kranj", "Masaže in sprostitveni programi.", 4.5, "https://images.unsplash.com/photo-1519823551278-64ac92734fb1"),
+
+    ("Novo mesto Wellness", "Novo mesto", "SPA", "Glavni trg 2, Novo mesto", "Sprostitveni programi.", 4.5, "https://images.unsplash.com/photo-1519823551278-64ac92734fb1"),
+    ("Novo mesto Beauty Lab", "Novo mesto", "Beauty", "Rozmanova 11, Novo mesto", "Ličenje, obrvi in lash lift.", 4.4, "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f"),
+
+    ("Nova Gorica Shine", "Nova Gorica", "Beauty", "Kidričeva 5, Nova Gorica", "Beauty tretmaji in nega obraza.", 4.6, "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f"),
+    ("Nova Gorica Hair & Spa", "Nova Gorica", "SPA", "Delpinova 4, Nova Gorica", "Wellness in nega las.", 4.5, "https://images.unsplash.com/photo-1515377905703-c4788e51af15"),
+]
+
+employees = [
+    (salon_map["Studio Lepota Koper"], "Nina", "Frizerka"),
+    (salon_map["Koper Beauty Room"], "Sara", "Kozmetičarka"),
+
+    (salon_map["Morski SPA Izola"], "Marko", "Maser"),
+    (salon_map["Izola Nail Studio"], "Tjaša", "Nail artist"),
+
+    (salon_map["Portorož Beauty Center"], "Eva", "SPA terapevtka"),
+    (salon_map["Portorož Hair Lounge"], "David", "Frizer"),
+
+    (salon_map["Ljubljana Glow Bar"], "Ana", "Beauty specialist"),
+    (salon_map["Frizerski Studio Šiška"], "Miha", "Frizer"),
+    (salon_map["Ljubljana Zen SPA"], "Petra", "Wellness terapevtka"),
+
+    (salon_map["Maribor Style Studio"], "Luka", "Frizer"),
+    (salon_map["Maribor Beauty Point"], "Maja", "Kozmetičarka"),
+
+    (salon_map["Celje Beauty Point"], "Nika", "Kozmetičarka"),
+    (salon_map["Celje Hair Studio"], "Rok", "Frizer"),
+
+    (salon_map["Kranj Hair Lounge"], "Tanja", "Frizerka"),
+    (salon_map["Kranj Relax Center"], "Blaž", "Maser"),
+
+    (salon_map["Novo mesto Wellness"], "Katja", "Maserka"),
+    (salon_map["Novo mesto Beauty Lab"], "Lara", "Makeup artist"),
+
+    (salon_map["Nova Gorica Shine"], "Eva", "Beauty specialist"),
+    (salon_map["Nova Gorica Hair & Spa"], "Alen", "Wellness specialist"),
+]
     cur.executemany(
         "INSERT INTO employees (salon_id, name, role) VALUES (?, ?, ?)", employees
     )
