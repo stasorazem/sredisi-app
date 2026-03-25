@@ -1,2 +1,2 @@
-# sredisi-app
-Slovenska aplikacija za rezervacijo terminov (SrediMe clone)
+# UrediMe-app
+Slovenska aplikacija za rezervacijo terminov (UrediMe clone)
