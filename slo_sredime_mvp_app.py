@@ -1,4 +1,4 @@
 import streamlit as st
 
-st.title("Sredi.si 🇸🇮")
+st.title("UrediMe 🇸🇮")
 st.write("Aplikacija deluje!")
