@@ -150,28 +150,34 @@ def seed_data(conn):
     cur.execute("SELECT id, name FROM salons")
     salon_map = {row["name"]: row["id"] for row in cur.fetchall()}
 
-    employees = [
-        (salon_map["Studio Lepota Koper"], "Nina", "Frizerka"),
-        (salon_map["Studio Lepota Koper"], "Sara", "Kozmetičarka"),
-        (salon_map["Morski SPA Izola"], "Marko", "Maser"),
-        (salon_map["Morski SPA Izola"], "Tina", "Wellness terapevtka"),
-        (salon_map["Ljubljana Glow Bar"], "Ana", "Nail artist"),
-        (salon_map["Ljubljana Glow Bar"], "Maja", "Beauty specialist"),
-    ]
+employees = [
+    (salon_map["Studio Lepota Koper"], "Nina", "Frizerka"),
+    (salon_map["Studio Lepota Koper"], "Sara", "Kozmetičarka"),
+    (salon_map["Morski SPA Izola"], "Marko", "Maser"),
+    (salon_map["Morski SPA Izola"], "Tina", "Wellness"),
+    (salon_map["Portorož Beauty Center"], "Eva", "SPA terapevtka"),
+    (salon_map["Ljubljana Glow Bar"], "Ana", "Nail artist"),
+    (salon_map["Frizerski Studio Šiška"], "Miha", "Frizer"),
+    (salon_map["Maribor Style Studio"], "Luka", "Frizer"),
+    (salon_map["Celje Beauty Point"], "Maja", "Kozmetičarka"),
+    (salon_map["Kranj Hair Lounge"], "Tanja", "Frizerka"),
+    (salon_map["Novo mesto Wellness"], "Petra", "Maserka"),
+]
     cur.executemany(
         "INSERT INTO employees (salon_id, name, role) VALUES (?, ?, ?)", employees
     )
 
-    services = [
-        (salon_map["Studio Lepota Koper"], "Žensko striženje", 60, 32.0, "Frizerstvo"),
-        (salon_map["Studio Lepota Koper"], "Barvanje las", 120, 58.0, "Frizerstvo"),
-        (salon_map["Studio Lepota Koper"], "Nega obraza", 75, 45.0, "Kozmetika"),
-        (salon_map["Morski SPA Izola"], "Klasična masaža", 50, 42.0, "Masaže"),
-        (salon_map["Morski SPA Izola"], "Antistres paket", 80, 65.0, "SPA"),
-        (salon_map["Ljubljana Glow Bar"], "Gel manikira", 60, 35.0, "Nail"),
-        (salon_map["Ljubljana Glow Bar"], "Pedikira", 50, 33.0, "Nail"),
-        (salon_map["Ljubljana Glow Bar"], "Lash lift", 45, 39.0, "Beauty"),
-    ]
+salons = [
+    ("Studio Lepota Koper", "Koper", "Frizerski in kozmetični salon", "Pristaniška 12, Koper", "Top frizerske in kozmetične storitve.", 4.8, ""),
+    ("Morski SPA Izola", "Izola", "SPA in masaže", "Veliki trg 4, Izola", "Sprostitveni wellness tretmaji.", 4.6, ""),
+    ("Portorož Beauty Center", "Portorož", "Wellness & SPA", "Obala 33, Portorož", "Luksuzni SPA tretmaji ob morju.", 4.9, ""),
+    ("Ljubljana Glow Bar", "Ljubljana", "Nail & beauty", "Trubarjeva 22", "Moderen beauty salon.", 4.9, ""),
+    ("Frizerski Studio Šiška", "Ljubljana", "Frizerstvo", "Celovška 88", "Hitra in kvalitetna frizura.", 4.5, ""),
+    ("Maribor Style Studio", "Maribor", "Frizerstvo", "Glavni trg 5", "Trend frizure in barvanje.", 4.7, ""),
+    ("Celje Beauty Point", "Celje", "Kozmetika", "Center 12", "Nega obraza in telesa.", 4.6, ""),
+    ("Kranj Hair Lounge", "Kranj", "Frizerstvo", "Prešernova 10", "Premium hair styling.", 4.8, ""),
+    ("Novo mesto Wellness", "Novo mesto", "SPA", "Glavni trg 2", "Sprostitveni programi.", 4.5, ""),
+]
     cur.executemany(
         """
         INSERT INTO services (salon_id, name, duration_min, price_eur, category)
